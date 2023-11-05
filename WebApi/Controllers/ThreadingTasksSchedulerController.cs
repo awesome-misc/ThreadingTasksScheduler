@@ -29,6 +29,11 @@ public class ThreadingTasksSchedulerController : ControllerBase
                                             [FromBody] JsonNode parameters = null!
                                         )
     {
+        Console.Clear();
+        Console.Clear();
+        Console.Clear();
+        Console.Clear();
+
         // Awesome Yuer
         // Must use below code at first in the method for using the ThreadingTasksScheduler
         SynchronizationContext.SetSynchronizationContext(_threadingTasksScheduler.SynchronizationContext);
@@ -61,6 +66,11 @@ public class ThreadingTasksSchedulerController : ControllerBase
                                             , [FromBody] JsonNode parameters = null!
                                         )
     {
+        Console.Clear();
+        Console.Clear();
+        Console.Clear();
+        Console.Clear();
+
         await StartRunConsumersInThreadingTasksSchedulerAsync
                 (
                     () =>
