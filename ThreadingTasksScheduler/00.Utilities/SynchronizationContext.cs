@@ -28,6 +28,7 @@ public sealed class ThreadingTasksSchedulerSynchronizationContext : Synchronizat
 
     public SendOrPostCallbackContext Receive()
     {
+        Console.WriteLine($"{nameof(Receive)}");
         var context = _blockingCollection.Take();
         if (context == null)
         {

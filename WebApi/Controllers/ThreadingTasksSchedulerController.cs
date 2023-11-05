@@ -1,7 +1,5 @@
 using Microshaoft;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Concurrent;
-using System.Text;
 
 namespace WebApi.Controllers;
 
@@ -9,145 +7,68 @@ namespace WebApi.Controllers;
 [Route("[controller]")]
 public class ThreadingTasksSchedulerController : ControllerBase
 {
+    private readonly ILogger<ThreadingTasksScheduler> _logger;
     private readonly ThreadingTasksScheduler _threadingTasksScheduler;
 
-    public ThreadingTasksSchedulerController(ThreadingTasksScheduler threadingTasksScheduler)
+    public ThreadingTasksSchedulerController
+                        (
+                            ILogger<ThreadingTasksScheduler> logger
+                            , ThreadingTasksScheduler threadingTasksScheduler
+                        )
     {
+        _logger = logger;
         _threadingTasksScheduler = threadingTasksScheduler;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAsync()
+    public async Task<IActionResult> GetAsync(int iters = 200)
     {
-        RunningTasks();
-        return await Task.FromResult(Ok());
+        // Awesome Yuer
+        // should use below code in the method for using the ThreadingTasksScheduler
+        SynchronizationContext.SetSynchronizationContext(_threadingTasksScheduler.SynchronizationContext);
+
+        Func<Task> runFirstOneTaskAsync = async () => 
+        {
+            var delay = 10000;
+            await Task.Delay(delay);
+            _logger.LogInformation($"Complete Task {nameof(runFirstOneTaskAsync)} delay {delay} @ {Thread.CurrentThread.ManagedThreadId} @ {DateTime.Now: HH:mm:ss.fffff}");
+        };
+
+        // Awesome Yuer
+        // Single Async Task Test
+        _ = runFirstOneTaskAsync();
+
+        // Awesome Yuer
+        // Multiple Async Batch Tasks Test
+        await StartRunBatchTasks(iters);
+        _logger.LogInformation($"=============Tasks Started @ {DateTime.Now}=========================");
+
+        return Ok();
     }
 
-    private void RunningTasks()
+    private async Task StartRunBatchTasks(int iters = 200)
     {
-        StringBuilder result1 = null!;
+        Console.Clear();
+        Console.Clear();
+        Console.Clear();
+        Console.Clear();
 
-        ConcurrentBag<string> result2 = null!;
+        var funcAsync = async (int x) => { return await RunOneTaskAsync(x); };
 
-        var input = string.Empty;
-
-        var information = "Press any key to test, Press 'q' to quit the sample.";
-
-        Console.WriteLine(information);
-
-        //while ((input = Console.ReadLine()) != "q")
+        for (var i = 0; i < iters; i++)
         {
-            result1 = new StringBuilder(5000);
-
-            result2 = new ConcurrentBag<string>();
-
-            RunOnce();
-
-            Thread.Sleep(2000);
-
-            //Console.WriteLine($"Result SB:\n{result1}");
-            //Console.WriteLine($"Result {nameof(ConcurrentBag<string>)}:");
-            //foreach (var item in result2)
-            //{
-            //    Console.WriteLine(item);
-            //}
-            //Console.WriteLine(information);
+            _ = funcAsync(i);
         }
 
-        void RunOnce()
+        async Task<string> RunOneTaskAsync(int i)
         {
-            Console.Clear();
-            for (var i = 0; i < 200; i++)
-            {
-                var ii = i;
-                _ = Task
-                        .Run
-                            (
-                                () =>
-                                {
-                                    var data = $"{nameof(Task.Run)} data - {ii}";
-                                    result1.AppendLine(data);
-                                    result2.Add(data);
-                                    var delay = Random.Shared.Next(2000, 10000);
-                                    Task.Delay(delay).Wait();
-                                    //Thread.Sleep(delay);
-                                    Console.WriteLine($"Complete: {data} delay {delay} @ {Thread.CurrentThread.ManagedThreadId}");
-                                }
-                            );
-            }
-            //_ = WriteTestAsync();
-
+            var delay = Random.Shared.Next(2000, 10000);
+            await Task.Delay(delay);
+            var data = $"{nameof(RunOneTaskAsync)}";
+            _logger.LogInformation($"Complete Task {i}: {data} delay {delay} @ {Thread.CurrentThread.ManagedThreadId} @ {DateTime.Now: HH:mm:ss.fffff}");
+            return data;
         }
 
-        async Task WriteTestAsync()
-        {
-            var t1 = Write1Async();
-            //t1 = Write4();
-            var t2 = Write2Async();
-            var data = nameof(WriteTestAsync);
-            result1.AppendLine($"{nameof(data)}: {data}");
-            result2.Add($"{nameof(data)}: {data}");
-            await Task.WhenAll(t1, t2);
-            await Write3Async();
-        }
-
-        async Task<string> Write4Async()
-        {
-            // Yield the thread (runs the remainder of the async code as a callback on the SchedulingSyncContext thread)
-            //await Task.Yield();
-            //await Task.Delay(10);
-            var data = nameof(Write4Async);
-            result1!.AppendLine($"{nameof(data)}: {data}");
-            result2!.Add($"{nameof(data)}: {data}");
-            //Console.WriteLine($"Complete: {data}");
-            return await Task.FromResult(data);
-        }
-
-        async Task Write1Async()
-        {
-            // Yield the thread (runs the remainder of the async code as a callback on the SchedulingSyncContext thread)
-            // task = null
-            await Task.Yield();
-            var data = nameof(Write1Async);
-            result1.AppendLine($"{nameof(data)}: {data}");
-            result2!.Add($"{nameof(data)}: {data}");
-            //Console.WriteLine($"Complete: {data}");
-        }
-        async Task Write2Async()
-        {
-            // Wait for 10 milliseconds before continuing (uses callbacks)
-            await Task.Delay(1000);
-            var data = nameof(Write2Async);
-            result1.AppendLine($"{nameof(data)}: {data}");
-            result2!.Add($"{nameof(data)}: {data}");
-            //Console.WriteLine($"Complete: {data}");
-        }
-        async Task Write3Async()
-        {
-            var data = nameof(Write3Async);
-            // Run these two tasks on the thread pool (could come out in any order)
-            var tA = Task
-                        .Run
-                            (
-                                () =>
-                                {
-                                    result1.AppendLine($"{nameof(data)}: {data} - 1");
-                                    result2.Add($"{nameof(data)}: {data} - 1");
-                                }
-                            );
-            var tB = Task
-                        .Run
-                            (
-                                () =>
-                                {
-                                    result1.AppendLine($"{nameof(data)}: {data} - 2");
-                                    result2.Add($"{nameof(data)}: {data} - 2");
-                                }
-                            );
-            // Wait for them to finish before continuing (uses callbacks)
-            await Task.WhenAll(tA, tB);
-            //Console.WriteLine($"Complete: {data}");
-        }
-        Console.WriteLine($"=============Tasks Started @ {DateTime.Now}=========================");
+        await Task.CompletedTask;
     }
 }

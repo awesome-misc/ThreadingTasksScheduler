@@ -11,7 +11,7 @@ builder.Services.AddSwaggerGen();
 
 // Awesome Yuer
 var threadingTasksScheduler = new ThreadingTasksScheduler(Environment.ProcessorCount);
-SynchronizationContext.SetSynchronizationContext(threadingTasksScheduler.SynchronizationContext);
+//SynchronizationContext.SetSynchronizationContext(threadingTasksScheduler.SynchronizationContext);
 
 builder.Services.AddSingleton(threadingTasksScheduler);
 

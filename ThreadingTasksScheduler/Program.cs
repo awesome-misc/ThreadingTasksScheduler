@@ -40,22 +40,19 @@ while ((input= Console.ReadLine()) != "q")
 
 void RunOnce()
 {
+    var x = async () => {
+        //var data = $"{nameof(Task.Run)} data - {ii}";
+        //result1.AppendLine(data);
+        //result2.Add(data);
+        //var delay = Random.Shared.Next(100, 2000);
+        //Task.Delay(delay).Wait();
+        //return Task.CompletedTask;
+        await Write4Async();
+    };
     for (var i = 0; i < 100; i++)
     {
         var ii = i;
-        _ = Task
-                .Run
-                    (
-                        () =>
-                        {
-                            var data = $"{nameof(Task.Run)} data - {ii}";
-                            result1.AppendLine(data);
-                            result2.Add(data);
-                            var delay = Random.Shared.Next(100, 2000);
-                            Task.Delay(delay);
-                            //Console.WriteLine($"Complete: {data} delay {delay} @ {Thread.CurrentThread.ManagedThreadId}");
-                        }
-                    );
+        _ = x();
     }
     _ = WriteTestAsync();
 
