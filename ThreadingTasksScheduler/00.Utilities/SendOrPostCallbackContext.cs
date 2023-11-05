@@ -24,6 +24,11 @@ public class SendOrPostCallbackContext
         _signal = signal;
     }
 
+    //public void Dispose()
+    //{
+    //    _signal.Dispose();
+    //}
+
     private ExecutionType _executionType { get; }
     private SendOrPostCallback _callback { get; }
     private object? _state { get; }

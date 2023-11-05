@@ -43,16 +43,16 @@ public class ThreadingTasksScheduler : IDisposable
         int i = (int) state;
         while (!_consumersThreadsIsStopping[i])
         {
-            SendOrPostCallbackContext callback;
+            SendOrPostCallbackContext callbackContext;
             try
             {
-                callback = _synchronizationContext.Receive();
+                callbackContext = _synchronizationContext.Receive();
             }
             catch (Exception)
             {
                 return;
             }
-            callback?.Execute();
+            callbackContext?.Execute();
         }
         //Console.WriteLine($"Thread {i} is stopped.");
     }

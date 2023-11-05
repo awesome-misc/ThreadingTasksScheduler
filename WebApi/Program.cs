@@ -10,7 +10,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Awesome Yuer
-var threadingTasksScheduler = new ThreadingTasksScheduler(Environment.ProcessorCount);
+var threadingTasksScheduler = new ThreadingTasksScheduler(4);
 //SynchronizationContext.SetSynchronizationContext(threadingTasksScheduler.SynchronizationContext);
 
 builder.Services.AddSingleton(threadingTasksScheduler);
