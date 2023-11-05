@@ -31,7 +31,8 @@ public class ThreadingTasksScheduler : IDisposable
         {
             _consumersThreads[i] = new Thread(ThreadProcess!)
             {
-                IsBackground = isBackground
+                IsBackground = isBackground,
+                Name = $"Thread-{i + 1:000}"
             };
             _consumersThreads[i].Start(i);
         }

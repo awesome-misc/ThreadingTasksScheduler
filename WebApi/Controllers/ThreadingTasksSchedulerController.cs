@@ -1,10 +1,12 @@
 using Microshaoft;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Nodes;
 
 namespace WebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+
 public class ThreadingTasksSchedulerController : ControllerBase
 {
     private readonly ILogger<ThreadingTasksScheduler> _logger;
@@ -19,57 +21,75 @@ public class ThreadingTasksSchedulerController : ControllerBase
         _logger = logger;
         _threadingTasksScheduler = threadingTasksScheduler;
     }
-
-    [HttpGet]
-    public async Task<IActionResult> GetAsync(int iters = 200)
+    
+    [HttpPost]
+    [Route("PostSingleTask")]
+    public async Task<IActionResult> PostSingleTaskAsync
+                                        (
+                                            [FromBody] JsonNode parameters = null!
+                                        )
     {
         // Awesome Yuer
-        // should use below code in the method for using the ThreadingTasksScheduler
+        // Must use below code at first in the method for using the ThreadingTasksScheduler
         SynchronizationContext.SetSynchronizationContext(_threadingTasksScheduler.SynchronizationContext);
 
-        Func<Task> runFirstOneTaskAsync = async () => 
+        var taskId = 0;
+        async Task<JsonNode> runConsumerTaskAsync(JsonNode x)
         {
-            var delay = 10000;
+            var delay = Random.Shared.Next(2 * 1000, 10 * 1000);
             await Task.Delay(delay);
             var currentThread = Thread.CurrentThread;
-            _logger.LogInformation($"Complete Task {nameof(runFirstOneTaskAsync)} delay {delay} @ {currentThread.ManagedThreadId}({nameof(currentThread.IsThreadPoolThread)}={currentThread.IsThreadPoolThread}) @ {DateTime.Now: HH:mm:ss.fffff}");
+            _logger.LogInformation($"Complete Task {nameof(runConsumerTaskAsync)}({taskId}), \n{nameof(parameters)}=\n{parameters}:\n delay {delay} @ Thread({currentThread.Name}, {nameof(currentThread.IsThreadPoolThread)}={currentThread.IsThreadPoolThread}) @ {DateTime.Now: HH:mm:ss.fffff}");
+            return parameters;
         };
 
         // Awesome Yuer
-        // Single Async Task Test
-        _ = runFirstOneTaskAsync();
+        // Invoke any Async method
+        _ = runConsumerTaskAsync(parameters);
 
-        // Awesome Yuer
-        // Multiple Async Batch Tasks Test
-        await StartRunBatchTasks(iters);
-        _logger.LogInformation($"=============Tasks Started @ {DateTime.Now}=========================");
+        _logger.LogInformation($"==============All Tasks Started @ {DateTime.Now}=========================");
+        return
+            await Task.FromResult(Ok());
+    }
 
+    [HttpPost]
+    [Route("PostBatchTasks")]
+    public async Task<IActionResult> PostBatchTasksAsync
+                                        (
+                                            [FromQuery]int iters = 200
+                                            , [FromBody] JsonNode parameters = null!
+                                        )
+    {
+        await StartRunConsumersInThreadingTasksSchedulerAsync
+                (
+                    () =>
+                    {
+                        var i = 0;
+                        Func<JsonNode, int, Task> runOneTaskAsync = async (JsonNode x, int taskId) =>
+                        {
+                            var delay = Random.Shared.Next(2 * 1000, 10 * 1000);
+                            await Task.Delay(delay);
+                            var currentThread = Thread.CurrentThread;
+                            _logger.LogInformation($"Complete Task {nameof(runOneTaskAsync)}({taskId}), \n{nameof(parameters)}=\n{x}:\n delay {delay} @ Thread({currentThread.Name}, {nameof(currentThread.IsThreadPoolThread)}={currentThread.IsThreadPoolThread}) @ {DateTime.Now: HH:mm:ss.fffff}");
+                        };
+
+                        for (; i < iters; i++)
+                        {
+                            _ = runOneTaskAsync(parameters, i);
+                        }
+                    }
+                );
+        _logger.LogInformation($"==============All Tasks Started @ {DateTime.Now}=========================");
         return Ok();
     }
 
-    private async Task StartRunBatchTasks(int iters = 200)
+    private async Task StartRunConsumersInThreadingTasksSchedulerAsync(Action action)
     {
-        Console.Clear();
-        Console.Clear();
-        Console.Clear();
-        Console.Clear();
+        // Awesome Yuer
+        // Must use below code at first in the method for using the ThreadingTasksScheduler
+        SynchronizationContext.SetSynchronizationContext(_threadingTasksScheduler.SynchronizationContext);
 
-        var funcAsync = async (int x) => { return await RunOneTaskAsync(x); };
-
-        for (var i = 0; i < iters; i++)
-        {
-            _ = funcAsync(i);
-        }
-
-        async Task<string> RunOneTaskAsync(int i)
-        {
-            var delay = Random.Shared.Next(2000, 10000);
-            await Task.Delay(delay);
-            var data = $"{nameof(RunOneTaskAsync)}";
-            var currentThread = Thread.CurrentThread;
-            _logger.LogInformation($"Complete Task {i}: {data} delay {delay} @ {currentThread.ManagedThreadId}({nameof(currentThread.IsThreadPoolThread)}={currentThread.IsThreadPoolThread}) @ {DateTime.Now: HH:mm:ss.fffff}");
-            return data;
-        }
+        action();
 
         await Task.CompletedTask;
     }
