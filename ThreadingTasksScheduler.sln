@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34221.43
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThreadingTasksScheduler", "ThreadingTasksScheduler\ThreadingTasksScheduler.csproj", "{C583F036-893D-42E8-B489-1BD9FB9E8B64}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "WebApi\WebApi.csproj", "{AF6C4071-7591-4BDB-A1BC-74C0E3D25B1E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C583F036-893D-42E8-B489-1BD9FB9E8B64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C583F036-893D-42E8-B489-1BD9FB9E8B64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C583F036-893D-42E8-B489-1BD9FB9E8B64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C583F036-893D-42E8-B489-1BD9FB9E8B64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF6C4071-7591-4BDB-A1BC-74C0E3D25B1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF6C4071-7591-4BDB-A1BC-74C0E3D25B1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF6C4071-7591-4BDB-A1BC-74C0E3D25B1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF6C4071-7591-4BDB-A1BC-74C0E3D25B1E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D6F49D1A-7274-48A4-A147-529B643D6F6B}
+	EndGlobalSection
+EndGlobal
