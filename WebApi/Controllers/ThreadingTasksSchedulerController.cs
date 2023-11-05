@@ -36,6 +36,7 @@ public class ThreadingTasksSchedulerController : ControllerBase
         var taskId = 0;
         async Task<JsonNode> runConsumerTaskAsync(JsonNode x)
         {
+            // Consumer Task Process
             var delay = Random.Shared.Next(2 * 1000, 10 * 1000);
             await Task.Delay(delay);
             var currentThread = Thread.CurrentThread;
@@ -44,7 +45,7 @@ public class ThreadingTasksSchedulerController : ControllerBase
         };
 
         // Awesome Yuer
-        // Invoke any Async method
+        // Invoke any Async method as Producer
         _ = runConsumerTaskAsync(parameters);
 
         _logger.LogInformation($"==============All Tasks Started @ {DateTime.Now}=========================");
