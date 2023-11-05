@@ -31,7 +31,8 @@ public class ThreadingTasksSchedulerController : ControllerBase
         {
             var delay = 10000;
             await Task.Delay(delay);
-            _logger.LogInformation($"Complete Task {nameof(runFirstOneTaskAsync)} delay {delay} @ {Thread.CurrentThread.ManagedThreadId} @ {DateTime.Now: HH:mm:ss.fffff}");
+            var currentThread = Thread.CurrentThread;
+            _logger.LogInformation($"Complete Task {nameof(runFirstOneTaskAsync)} delay {delay} @ {currentThread.ManagedThreadId}({nameof(currentThread.IsThreadPoolThread)}={currentThread.IsThreadPoolThread}) @ {DateTime.Now: HH:mm:ss.fffff}");
         };
 
         // Awesome Yuer
@@ -65,7 +66,8 @@ public class ThreadingTasksSchedulerController : ControllerBase
             var delay = Random.Shared.Next(2000, 10000);
             await Task.Delay(delay);
             var data = $"{nameof(RunOneTaskAsync)}";
-            _logger.LogInformation($"Complete Task {i}: {data} delay {delay} @ {Thread.CurrentThread.ManagedThreadId} @ {DateTime.Now: HH:mm:ss.fffff}");
+            var currentThread = Thread.CurrentThread;
+            _logger.LogInformation($"Complete Task {i}: {data} delay {delay} @ {currentThread.ManagedThreadId}({nameof(currentThread.IsThreadPoolThread)}={currentThread.IsThreadPoolThread}) @ {DateTime.Now: HH:mm:ss.fffff}");
             return data;
         }
 
