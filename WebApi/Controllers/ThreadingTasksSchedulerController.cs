@@ -112,6 +112,11 @@ public class ThreadingTasksSchedulerController : ControllerBase
             //Task.WaitAll(tasks.ToArray());
 
             await Task.WhenAll(tasks);
+
+            foreach (var task in tasks)
+            {
+                task.Dispose();
+            }
             tasks.Clear();
             tasks = null;
             var currentThread = Thread.CurrentThread;
