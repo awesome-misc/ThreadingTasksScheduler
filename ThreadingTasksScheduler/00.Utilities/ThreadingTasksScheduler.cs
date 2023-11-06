@@ -12,9 +12,13 @@ public class ThreadingTasksScheduler : IDisposable
     
     private readonly object _locker = new object();
 
-    private readonly bool[] _consumersThreadsIsStopping;
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-    public ThreadingTasksScheduler(int consumersThreadsCount = 1, bool isBackground = false)
+    public ThreadingTasksScheduler
+                (
+                    int consumersThreadsCount = 1
+                    , bool isBackground = false
+                )
     {
         if (consumersThreadsCount < 1)
         {
@@ -24,8 +28,6 @@ public class ThreadingTasksScheduler : IDisposable
         _synchronizationContext = new ThreadingTasksSchedulerSynchronizationContext();
         
         _consumersThreads = new Thread[consumersThreadsCount];
-
-        _consumersThreadsIsStopping = new bool[consumersThreadsCount];
 
         for (int i = 0; i < _consumersThreads.Length; i++)
         {
@@ -40,13 +42,12 @@ public class ThreadingTasksScheduler : IDisposable
 
     private void ThreadProcess(object state)
     {
-        int i = (int) state;
-        while (!_consumersThreadsIsStopping[i])
+        while (!_cancellationTokenSource.Token.IsCancellationRequested)
         {
             SendOrPostCallbackContext callbackContext;
             try
             {
-                callbackContext = _synchronizationContext.Receive();
+                callbackContext = _synchronizationContext.Receive(_cancellationTokenSource.Token);
             }
             catch (Exception)
             {
@@ -67,16 +68,13 @@ public class ThreadingTasksScheduler : IDisposable
             }
             _disposed = true;
         }
+        
+        _cancellationTokenSource.Cancel();
 
-        for(var i = 0; i < _consumersThreadsIsStopping.Length; i ++)
+        foreach (var thread in _consumersThreads)
         {
-            //thread.Join();
-            _consumersThreadsIsStopping[i] = true;
+            thread.Join();
         }
-
-        _synchronizationContext.Unblock(_consumersThreads.Length);
-
-        //Thread.Sleep(1000);
 
         _synchronizationContext.Dispose();
     }

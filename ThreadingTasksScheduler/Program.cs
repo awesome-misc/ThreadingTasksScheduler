@@ -8,6 +8,7 @@ Console.WriteLine("Hello, World!");
 var scheduler = new ThreadingTasksScheduler(4);
 SynchronizationContext.SetSynchronizationContext(scheduler.SynchronizationContext);
 
+
 StringBuilder result1 = null!;
 
 ConcurrentBag<string> result2 = null!;
@@ -29,6 +30,8 @@ while ((input= Console.ReadLine()) != "q")
 
     Thread.Sleep(2000);
 
+    scheduler.Dispose();
+    
     Console.WriteLine($"Result SB:\n{result1}");
     Console.WriteLine($"Result {nameof(ConcurrentBag<string>)}:");
     foreach (var item in result2)
@@ -61,7 +64,8 @@ void RunOnce()
 
 
 
-scheduler.Dispose();
+
+
 
 async Task WriteTestAsync()
 {

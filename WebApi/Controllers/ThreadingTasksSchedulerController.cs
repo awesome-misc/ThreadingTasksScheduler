@@ -2,6 +2,7 @@ using Microshaoft;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 
 namespace WebApi.Controllers;
 
@@ -22,7 +23,85 @@ public class ThreadingTasksSchedulerController : ControllerBase
         _logger = logger;
         _threadingTasksScheduler = threadingTasksScheduler;
     }
-    
+
+    [HttpPost]
+    [Route("Gc")]
+    public async Task<IActionResult> PostGcAsync
+                                        (
+                                            
+                                        )
+    {
+        GC.Collect();
+        return
+            await Task.FromResult(Ok());
+    }
+
+    [HttpPost]
+    [Route("Test")]
+    public async Task<IActionResult> TestTaskAsync
+                                        (
+                                            [FromQuery]int iters = 200,
+                                            [FromBody] JsonNode parameters = null!
+                                        )
+    {
+        Console.Clear();
+        Console.Clear();
+        Console.Clear();
+        Console.Clear();
+
+        async Task runCommonTaskAsync()
+        {
+            var taskId = -1;
+            // Consumer Task Process
+            var delay = Random.Shared.Next(2 * 1000, 10 * 1000);
+            delay = 5000;
+            await Task.Delay(delay);
+            var currentThread = Thread.CurrentThread;
+            _logger.LogInformation($"Complete Task {nameof(runCommonTaskAsync)}({taskId}), delay {delay} @ Thread({currentThread.Name}, {nameof(currentThread.IsThreadPoolThread)}={currentThread.IsThreadPoolThread}) @ {DateTime.Now: HH:mm:ss.fffff}");
+        };
+
+        async Task runInvokerTaskAsync()
+        {
+            SynchronizationContext.SetSynchronizationContext(_threadingTasksScheduler.SynchronizationContext);
+            _ = runInnerTaskAsync();
+            await Task.CompletedTask;
+        }
+
+        async Task runInnerTaskAsync()
+        {
+            //var taskId = -2;
+            // Consumer Task Process
+            //var delay = Random.Shared.Next(2 * 1000, 10 * 1000);
+            //delay = 5000;
+            //await Task.Delay(delay);
+            //var currentThread = Thread.CurrentThread;
+            //_logger.LogInformation($"Complete Task {nameof(runInvokerTaskAsync)}({taskId}), delay {delay} @ Thread({currentThread.Name}, {nameof(currentThread.IsThreadPoolThread)}={currentThread.IsThreadPoolThread}) @ {DateTime.Now: HH:mm:ss.fffff}");
+            _ = runInner2TaskAsync();
+            await Task.CompletedTask;
+        };
+
+        async Task runInner2TaskAsync()
+        {
+            var taskId = -2;
+            // Consumer Task Process
+            var delay = Random.Shared.Next(2 * 1000, 10 * 1000);
+            delay = 5000;
+            await Task.Delay(delay);
+            var currentThread = Thread.CurrentThread;
+            _logger.LogInformation($"Complete Task {nameof(runInvokerTaskAsync)}({taskId}), delay {delay} @ Thread({currentThread.Name}, {nameof(currentThread.IsThreadPoolThread)}={currentThread.IsThreadPoolThread}) @ {DateTime.Now: HH:mm:ss.fffff}");
+        };
+
+        for (var i = 0; i < iters; i++)
+        {
+            _ = runInvokerTaskAsync();
+            _ = runCommonTaskAsync();
+        }
+
+        return
+            await Task.FromResult(Ok());
+    }
+
+
     [HttpPost]
     [Route("PostSingleTask")]
     public async Task<IActionResult> PostSingleTaskAsync

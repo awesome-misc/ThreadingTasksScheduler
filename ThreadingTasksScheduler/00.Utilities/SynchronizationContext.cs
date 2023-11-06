@@ -26,10 +26,10 @@ public sealed class ThreadingTasksSchedulerSynchronizationContext : Synchronizat
         }
     }
 
-    public SendOrPostCallbackContext Receive()
+    public SendOrPostCallbackContext Receive(CancellationToken cancellationToken)
     {
         Console.WriteLine($"{nameof(Receive)}");
-        var context = _blockingCollection.Take();
+        var context = _blockingCollection.Take(cancellationToken);
         if (context == null)
         {
             throw new ThreadInterruptedException("context was unblocked.");
@@ -37,15 +37,15 @@ public sealed class ThreadingTasksSchedulerSynchronizationContext : Synchronizat
         return context;
     }
 
-    public void Unblock() => _blockingCollection.Add(null!);
+    //public void Unblock() => _blockingCollection.Add(null!);
 
-    public void Unblock(int count)
-    {
-        for (; count > 0; count--)
-        {
-            _blockingCollection.Add(null!);
-        }
-    }
+    //public void Unblock(int count)
+    //{
+    //    for (; count > 0; count--)
+    //    {
+    //        _blockingCollection.Add(null!);
+    //    }
+    //}
 
     public void Dispose() => _blockingCollection.Dispose();
 }
