@@ -114,12 +114,13 @@ async Task Scenario_Switch_SetSynchronizationContext_async(int iters = 1)
             }
         };
 
-        var xx = SynchronizationContext.Current;
-        
+        // lastSynchronizationContext is null
+        var lastSynchronizationContext = SynchronizationContext.Current;
+                
         SynchronizationContext.SetSynchronizationContext(threadingTasksScheduler.SynchronizationContext);
         action();
 
-        SynchronizationContext.SetSynchronizationContext(xx);
+        SynchronizationContext.SetSynchronizationContext(lastSynchronizationContext);
         action();
         
     }
