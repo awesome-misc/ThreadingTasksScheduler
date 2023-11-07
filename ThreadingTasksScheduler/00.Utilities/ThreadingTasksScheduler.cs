@@ -1,5 +1,7 @@
 ﻿// https://samuelcollins.dev/posts/dotnet-custom-scheduler/
 
+using System.Threading;
+
 namespace Microshaoft;
 
 public class ThreadingTasksScheduler : IDisposable
@@ -55,8 +57,9 @@ public class ThreadingTasksScheduler : IDisposable
             catch (Exception)
             {
                 return;
+                //throw;
             }
-            callbackContext?.Execute();
+            callbackContext.Execute();
         }
         //Console.WriteLine($"Thread {i} is stopped.");
     }
@@ -79,6 +82,10 @@ public class ThreadingTasksScheduler : IDisposable
             thread.Join();
         }
 
+        _cancellationTokenSource.Dispose();
+
         _synchronizationContext.Dispose();
+
+        
     }
 }
