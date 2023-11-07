@@ -9,21 +9,25 @@ public sealed class ThreadingTasksSchedulerSynchronizationContext : Synchronizat
 
     public override void Post(SendOrPostCallback callback, object? state)
     {
+        Console.WriteLine($"begin: {nameof(Post)} @ {DateTime.Now:HH:mm:ss.ffffff}");
         _blockingCollection.Add(new SendOrPostCallbackContext(ExecutionType.Post, callback, state!, null!));
+        Console.WriteLine($"end: {nameof(Post)} @ {DateTime.Now:HH:mm:ss.ffffff}");
     }
 
     public override void Send(SendOrPostCallback callback, object? state)
     {
+        Console.WriteLine($"begin: {nameof(Send)} @ {DateTime.Now:HH:mm:ss.ffffff}");
         using (var signal = new ManualResetEventSlim())
         {
-            var callbackItem = new SendOrPostCallbackContext(ExecutionType.Send, callback, state!, signal);
-            _blockingCollection.Add(callbackItem);
+            var sendOrPostCallbackContext = new SendOrPostCallbackContext(ExecutionType.Send, callback, state!, signal);
+            _blockingCollection.Add(sendOrPostCallbackContext);
             signal.Wait();
-            if (callbackItem.Exception != null)
+            if (sendOrPostCallbackContext.Exception != null)
             {
-                throw callbackItem.Exception;
+                throw sendOrPostCallbackContext.Exception;
             }
         }
+        Console.WriteLine($"end: {nameof(Send)} @ {DateTime.Now:HH:mm:ss.ffffff}");
     }
 
     public SendOrPostCallbackContext Receive(CancellationToken cancellationToken)

@@ -33,9 +33,10 @@ public class TasksThreadPool : TaskScheduler, IDisposable
         while (true)
         {
             var task = _blockingCollection.Take();
-            if (task == null)
-                return;
-            TryExecuteTask(task);
+            if (task != null)
+            {
+                TryExecuteTask(task);
+            }
         }
     }
     protected virtual void Dispose(bool disposing)

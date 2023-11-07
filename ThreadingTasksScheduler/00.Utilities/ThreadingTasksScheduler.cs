@@ -1,4 +1,6 @@
-﻿namespace Microshaoft;
+﻿// https://samuelcollins.dev/posts/dotnet-custom-scheduler/
+
+namespace Microshaoft;
 
 public class ThreadingTasksScheduler : IDisposable
 {
@@ -42,6 +44,7 @@ public class ThreadingTasksScheduler : IDisposable
 
     private void ThreadProcess(object state)
     {
+        var i = (int) state!;
         while (!_cancellationTokenSource.Token.IsCancellationRequested)
         {
             SendOrPostCallbackContext callbackContext;

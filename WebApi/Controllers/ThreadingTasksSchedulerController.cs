@@ -76,6 +76,7 @@ public class ThreadingTasksSchedulerController : ControllerBase
             //await Task.Delay(delay);
             //var currentThread = Thread.CurrentThread;
             //_logger.LogInformation($"Complete Task {nameof(runInvokerTaskAsync)}({taskId}), delay {delay} @ Thread({currentThread.Name}, {nameof(currentThread.IsThreadPoolThread)}={currentThread.IsThreadPoolThread}) @ {DateTime.Now: HH:mm:ss.fffff}");
+
             _ = runInner2TaskAsync();
             await Task.CompletedTask;
         };
@@ -91,8 +92,24 @@ public class ThreadingTasksSchedulerController : ControllerBase
             _logger.LogInformation($"Complete Task {nameof(runInvokerTaskAsync)}({taskId}), delay {delay} @ Thread({currentThread.Name}, {nameof(currentThread.IsThreadPoolThread)}={currentThread.IsThreadPoolThread}) @ {DateTime.Now: HH:mm:ss.fffff}");
         };
 
+        //await runInner2TaskAsync();
+
+        void Aa()
+        {
+            var action = () =>
+            {
+                Thread.Sleep(1000);
+            };
+            SynchronizationContext.SetSynchronizationContext(_threadingTasksScheduler.SynchronizationContext);
+
+            action();
+        }
+        Aa();
+
+
         for (var i = 0; i < iters; i++)
         {
+            
             _ = runInvokerTaskAsync();
             _ = runCommonTaskAsync();
         }
